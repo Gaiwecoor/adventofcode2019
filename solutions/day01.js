@@ -1,15 +1,14 @@
-const setup = (data) => data.split("\n").map(l => parseInt(l, 10));
+const setup = (data) => data.split("\n").map(load => parseInt(load, 10));
 
 function part1(data) {
-  return data.map(l => Math.floor(l / 3) - 2).reduce((a, c) => a + c, 0);
+  return data.reduce((total, load) => total + Math.floor(load / 3) - 2, 0);
 }
 
 function part2(data) {
-  const fuel = (m) => Math.max(Math.floor(m / 3) - 2, 0);
+  const fuel = (load) => Math.max(Math.floor(load / 3) - 2, 0);
 
   let total = 0;
-  for (let i = 0; i < data.length; i++) {
-    let tank = data[i];
+  for (let tank of data) {
     let additional;
 
     while (additional = fuel(tank)) {
