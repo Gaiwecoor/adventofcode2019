@@ -289,12 +289,37 @@ class USet extends Set {
   }
 }
 
+class Tree {
+  constructor(id, parent) {
+    this.id = id;
+    this.parent = parent;
+    this.children = new UMap();
+  }
+
+  addChild(child, returnChild = false) {
+    let thisType = this.constructor;
+    if (!(child instanceof thisType)) child = new thisType(child);
+    child.parent = this;
+    this.children.set(child.id, child);
+    return (returnChild ? child : this);
+  }
+
+  get root() {
+    if (!this.parent) return this;
+    let current = this;
+    while (current = current.parent) {
+      if (!current.parent) return current;
+    }
+  }
+}
+
 module.exports = {
   factorial,
   Grid,
   Link,
   Solution,
   Point,
+  Tree,
   UMap,
   USet
 };
