@@ -1,5 +1,3 @@
-const setup = (data) => data.split("\n").map(o => o.split(")"));
-
 const {Tree, UMap, USet} = require("../tools");
 
 class Celestial extends Tree {
@@ -8,43 +6,40 @@ class Celestial extends Tree {
   }
 
   get orbitCount() {
-    return (this.parent ? this.parent.orbitCount + 1 : 0);
+    if (this.ocount) return this.ocount;
+    else return this.ocount = (this.parent ? this.parent.orbitCount + 1 : 0);
   }
 }
 
-const orbits = new UMap();
-
-function part1(data) {
-  for (let [center, satellite] of data) {
+const setup = (data) => {
+  const orbits = new UMap();
+  for (let [center, satellite] of data.split("\n").map(o => o.split(")"))) {
     if (!orbits.has(center)) orbits.set(center, new Celestial(center));
     if (!orbits.has(satellite)) orbits.set(satellite, new Celestial(satellite));
     orbits.get(center).addChild(orbits.get(satellite));
   }
+  return orbits;
+};
+
+function part1(orbits) {
   let count = 0;
   for (const [key, satellite] of orbits) count += satellite.orbitCount;
   return count;
 }
 
-function part2(data) {
+function part2(orbits) {
   let chain = new USet();
   let you = orbits.get("YOU");
   let san = orbits.get("SAN");
-  let node, current;
+  let ancestor;
 
-  current = you;
-  while (current = current.parent) {
-    chain.add(current);
-  }
+  ancestor = you;
+  while (ancestor = ancestor.parent) chain.add(ancestor);
 
-  current = san;
-  while (current = current.parent) {
-    if (chain.has(current)) {
-      node = current;
-      break;
-    }
-  }
+  ancestor = san;
+  while (!chain.has(ancestor)) ancestor = ancestor.parent;
 
-  return you.parent.orbitCount + san.parent.orbitCount - 2 * (node.orbitCount);
+  return you.parent.orbitCount + san.parent.orbitCount - 2 * (ancestor.orbitCount);
 }
 
 module.exports = {setup, part1, part2};
