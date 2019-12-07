@@ -38,6 +38,112 @@ class Grid extends Map {
   }
 }
 
+class Intcode {
+  constructor() {
+    this.p = 0;
+    this.opcodes = {
+      1: {op: "ADD", params: 3, mask: [0, 0, 1]},
+      2: {op: "MULT", params: 3, mask: [0, 0, 1]},
+      3: {op: "INPUT", params: 1, mask: [1]},
+      4: {op: "OUTPUT", params: 1, mask: [0]},
+      5: {op: "JIT", params: 2, mask: [0, 0]},
+      6: {op: "JIF", params: 2, mask: [0, 0]},
+      7: {op: "LT", params: 3, mask: [0, 0, 1]},
+      8: {op: "EQ", params: 3, mask: [0, 0, 1]},
+      99: {op: "EXIT", params: 0, mask: []}
+    };
+    this.halt = false;
+  }
+
+  printOutput(val) {
+    this.print = val;
+    return this;
+  }
+
+  execute() {
+    let inst;
+    while (!this.halt) {
+      let {op, modes} = this.mode(this.code[this.p]);
+      let params = this.code.slice(this.p + 1, this.p + 1 + op.params)
+      .map((p, i) => (modes[i] ? p : this.code[p]));
+      if (this[op.op](...params)) break;
+    }
+    return this;
+  }
+
+  loadCode(code, preserve = true) {
+    if (preserve) {
+      this.code = Array(code.length);
+      for (let i = 0; i < code.length; i++) this.code[i] = code[i];
+    } else this.code = code;
+    return this;
+  }
+
+  mode(num) {
+    const opcode = num % 100;
+    const op = this.opcodes[opcode];
+    if (!op) throw new Error("I don't know this op code! " + opcode);
+    const params = op.mask.length;
+    const modes = op.mask.map(m => m);
+    for (let i = 0; i < params; i++) {
+      modes[i] = (modes[i] ? 1 : Math.floor(num / (10 ** (i + 2))) % 10);
+    }
+    return {op, modes};
+  }
+
+  setInput(val) {
+    this.input = val;
+    return this;
+  }
+
+  // OP CODES
+  ADD(a, b, c) {
+    this.code[c] = a + b;
+    this.p += 4;
+  }
+
+  MULT(a, b, c) {
+    this.code[c] = a * b;
+    this.p += 4;
+  }
+
+  INPUT(a) {
+    this.code[a] = this.input;
+    this.p += 2;
+  }
+
+  OUTPUT(a) {
+    this.out = a;
+    if (this.print) console.log(this.out);
+    this.p += 2;
+  }
+
+  JIT(a, b) {
+    if (a) this.p = b;
+    else this.p += 3;
+  }
+
+  JIF(a, b) {
+    if (!a) this.p = b;
+    else this.p += 3;
+  }
+
+  LT(a, b, c) {
+    this.code[c] = (a < b ? 1 : 0);
+    this.p += 4;
+  }
+
+  EQ(a, b, c) {
+    this.code[c] = (a == b ? 1 : 0);
+    this.p += 4;
+  }
+
+  EXIT() {
+    this.halt = true;
+    return true;
+  }
+}
+
 class Link {
   constructor(value, closed = true) {
     this.value = value;
@@ -316,6 +422,7 @@ class Tree {
 module.exports = {
   factorial,
   Grid,
+  Intcode,
   Link,
   Solution,
   Point,
