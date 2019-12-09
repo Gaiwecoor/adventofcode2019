@@ -39,20 +39,25 @@ class Grid extends Map {
 }
 
 class Intcode {
-  constructor() {
+  constructor(code, input) {
     this.p = 0;
+    this.input = [];
+    this.relbase = 0;
     this.opcodes = {
-      1: {op: "ADD", params: 3, mask: [0, 0, 1]},
-      2: {op: "MULT", params: 3, mask: [0, 0, 1]},
-      3: {op: "INPUT", params: 1, mask: [1]},
-      4: {op: "OUTPUT", params: 1, mask: [0]},
-      5: {op: "JIT", params: 2, mask: [0, 0]},
-      6: {op: "JIF", params: 2, mask: [0, 0]},
-      7: {op: "LT", params: 3, mask: [0, 0, 1]},
-      8: {op: "EQ", params: 3, mask: [0, 0, 1]},
-      99: {op: "EXIT", params: 0, mask: []}
+      1: {op: "ADD", params: 3, ref: [0, 0, 1]},
+      2: {op: "MULT", params: 3, ref: [0, 0, 1]},
+      3: {op: "INPUT", params: 1, ref: [1]},
+      4: {op: "OUTPUT", params: 1, ref: [0]},
+      5: {op: "JIT", params: 2, ref: [0, 0]},
+      6: {op: "JIF", params: 2, ref: [0, 0]},
+      7: {op: "LT", params: 3, ref: [0, 0, 1]},
+      8: {op: "EQ", params: 3, ref: [0, 0, 1]},
+      9: {op: "REL", params: 1, ref: [0]},
+      99: {op: "EXIT", params: 0, ref: []}
     };
     this.halt = false;
+    if (code) this.loadCode(code);
+    if (input !== undefined) this.setInput(input);
   }
 
   printOutput(val) {
@@ -61,11 +66,21 @@ class Intcode {
   }
 
   execute() {
-    let inst;
     while (!this.halt) {
-      let {op, modes} = this.mode(this.code[this.p]);
+      let {op, modes} = this.mode(this.code[this.p] || 0);
       let params = this.code.slice(this.p + 1, this.p + 1 + op.params)
-      .map((p, i) => (modes[i] ? p : this.code[p]));
+      .map((p, i) => {
+        if ((modes[i] == 0) && !op.ref[i]) {
+          return this.code[p] || 0;
+        } else if ((modes[i] == 1) || ((modes[i] == 0) && op.ref[i])) {
+          return p;
+        } else if ((modes[i] == 2) && !op.ref[i]) {
+          return this.code[this.relbase + p] || 0;
+        } else if ((modes[i] == 2) && op.ref[i]) {
+          return this.relbase + p;
+        }
+      });
+      //console.log({op, modes, params});
       if (this[op.op](...params)) break;
     }
     return this;
@@ -82,17 +97,18 @@ class Intcode {
   mode(num) {
     const opcode = num % 100;
     const op = this.opcodes[opcode];
-    if (!op) throw new Error("I don't know this op code! " + opcode);
-    const params = op.mask.length;
-    const modes = op.mask.map(m => m);
+    if (!op) throw new Error("I don't know this op code! " + JSON.stringify({opcode, num}));
+    const params = op.ref.length;
+    const modes = Array(params);
     for (let i = 0; i < params; i++) {
-      modes[i] = (modes[i] ? 1 : Math.floor(num / (10 ** (i + 2))) % 10);
+      modes[i] = Math.floor(num / (10 ** (i + 2))) % 10;
     }
     return {op, modes};
   }
 
   setInput(val) {
-    this.input = val;
+    if (val instanceof Intcode) val.nextIntcode = this;
+    else this.input.push(val);
     return this;
   }
 
@@ -108,13 +124,16 @@ class Intcode {
   }
 
   INPUT(a) {
-    this.code[a] = this.input;
-    this.p += 2;
+    if (this.input.length > 0) {
+      this.code[a] = this.input.shift();
+      this.p += 2;
+    } else return true;
   }
 
   OUTPUT(a) {
     this.out = a;
     if (this.print) console.log(this.out);
+    if (this.nextIntcode) this.nextIntcode.setInput(this.out);
     this.p += 2;
   }
 
@@ -136,6 +155,11 @@ class Intcode {
   EQ(a, b, c) {
     this.code[c] = (a == b ? 1 : 0);
     this.p += 4;
+  }
+
+  REL(a) {
+    this.relbase += a;
+    this.p += 2;
   }
 
   EXIT() {
