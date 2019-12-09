@@ -1,30 +1,5 @@
 const {Intcode} = require("../tools");
 
-class Ampcode extends Intcode {
-  constructor(input) {
-    super();
-    this.input = [input];
-  }
-
-  setInput(val) {
-    if (val instanceof Ampcode) val.nextAmp = this;
-    else this.input.push(val);
-    return this;
-  }
-
-  INPUT(a) {
-    if (this.input.length > 0) {
-      this.code[a] = this.input.shift();
-      this.p += 2;
-    } else return true;
-  }
-
-  OUTPUT(a) {
-    super.OUTPUT(a);
-    if (this.nextAmp) this.nextAmp.setInput(this.out);
-  }
-}
-
 const setup = (code) => code.split(",").map(n => parseInt(n, 10));
 
 function part1(code, sigStart = 0) {
@@ -54,9 +29,9 @@ function part1(code, sigStart = 0) {
             signal.fill(undefined, 4);
             if (signal.includes(e)) continue AmpE;
             signal[4] = e;
-            amps = signal.map((phase, amp) => new Ampcode(phase).loadCode(code));
+            amps = signal.map((phase, amp) => new Intcode(code).setInput(phase));
             amps[0].setInput(0);
-            for (let amp = 0; amp < 5; amp++) amps[amp].nextAmp = amps[(amp + 1) % 5];
+            for (let amp = 0; amp < 5; amp++) amps[amp].nextIntcode = amps[(amp + 1) % 5];
             let amp = 0;
             while (amps.reduce((a, c) => a || !c.halt, false)) { // Continue as long as one of the amps hasn't halted
               amps[amp].execute();
