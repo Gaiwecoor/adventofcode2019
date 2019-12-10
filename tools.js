@@ -80,7 +80,6 @@ class Intcode {
           return this.relbase + p;
         }
       });
-      //console.log({op, modes, params});
       if (this[op.op](...params)) break;
     }
     return this;
@@ -248,6 +247,13 @@ class Point {
       this.y = y;
       this.value = v;
     }
+  }
+
+  angleTo(pt) {
+    // +y downward, 0 North
+    let angle = Math.atan2(pt.x - this.x, this.y - pt.y);
+    if (angle < 0) angle += Math.PI * 2;
+    return angle;
   }
 
   d(pt) {
