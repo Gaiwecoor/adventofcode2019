@@ -53,7 +53,7 @@ function part1(code) {
 
 function part2(code) {
   let robo = new Robo(code);
-  robo.hull.set(0, 0, {paint: 1});
+  robo.hull.set(0, 0, 1);
   robo.execute();
   for (let y = 0; y > -6; y--) {
     let line = "";
