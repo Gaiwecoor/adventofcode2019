@@ -64,6 +64,21 @@ class PlanetSystem extends Array {
   }
 }
 
+function findLCM(numbers) {
+  if (!Array.isArray(numbers) || numbers.length == 0) return null;
+  if (numbers.length == 1) return numbers[0];
+  let a = numbers.shift();
+  while (numbers.length > 0) {
+    let b = numbers.shift();
+    let big = Math.max(a, b);
+    let small = Math.min(a, b);
+    let lcm = big;
+    while (lcm % small != 0) lcm += big;
+    a = lcm;
+  }
+  return a;
+}
+
 function part1(data) {
   const planets = new PlanetSystem(data)
   planets.step(1000);
@@ -87,7 +102,7 @@ function part2(data) {
     planets.step();
     step++;
   }
-  return cycle;
+  return findLCM(cycle);
 }
 
 module.exports = {setup, part1, part2};
