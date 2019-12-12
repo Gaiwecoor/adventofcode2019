@@ -88,16 +88,13 @@ function part1(data) {
 function part2(data) {
   const planets = new PlanetSystem(data);
   const states = Array(3);
-  for (let i = 0; i < 3; i++) states[i] = new Set();
+  for (let i = 0; i < 3; i++) states[i] = planets.state(i);
   let cycle = Array(3).fill(0);
   let step = 0;
   while (cycle.includes(0)) {
     for (let i = 0; i < 3; i++) {
       if (cycle[i]) continue;
-
-      let state = planets.state(i);
-      if (states[i].has(state)) cycle[i] = step;
-      states[i].add(state);
+      if (states[i] == planets.state(i)) cycle[i] = step;
     }
     planets.step();
     step++;
