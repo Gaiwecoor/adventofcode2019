@@ -20,24 +20,6 @@ function factorial(n) {
   return product;
 }
 
-class Grid extends Map {
-  constructor(data) {
-    super(data);
-  }
-
-  get(x, y) {
-    return super.get(`${x},${y}`);
-  }
-
-  has(x, y) {
-    return super.has(`${x},${y}`);
-  }
-
-  set(x, y, value) {
-    return super.set(`${x},${y}`, value);
-  }
-}
-
 class Intcode {
   constructor(code, input) {
     this.p = 0;
@@ -360,6 +342,24 @@ class UMap extends Map {
   sort(fn) {
     let sorted = Array.from(this.values());
     return sorted.sort(fn);
+  }
+}
+
+class Grid extends UMap {
+  constructor(data) {
+    super(data);
+  }
+
+  get(x, y) {
+    return super.get(`${x},${y}`);
+  }
+
+  has(x, y) {
+    return super.has(`${x},${y}`);
+  }
+
+  set(x, y, value) {
+    return super.set(`${x},${y}`, value);
   }
 }
 
