@@ -1,5 +1,4 @@
-const {Intcode, Grid} = require("../tools");
-const setup = (data) => data.split(",").map(n => parseInt(n, 10));
+const {Intcode, Grid, setup} = require("../tools");
 
 class Hull extends Grid {
   constructor(data) {

@@ -1,6 +1,4 @@
-const setup = (data) => data.split(",").map(n => parseInt(n, 10));
-
-const {Intcode} = require("../tools");
+const {Intcode, setup} = require("../tools");
 
 function part1(data, input = 1) {
   const program = new Intcode(data).setInput(input);

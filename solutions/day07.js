@@ -1,6 +1,4 @@
-const {Intcode} = require("../tools");
-
-const setup = (code) => code.split(",").map(n => parseInt(n, 10));
+const {Intcode, setup} = require("../tools");
 
 function part1(code, sigStart = 0) {
   let signal = Array(5);

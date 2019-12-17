@@ -20,6 +20,11 @@ function factorial(n) {
   return product;
 }
 
+// So many Intcode problems, may as well standardize the setup function.
+function setup(data) {
+  return data.split(",").map(n => parseInt(n, 10));
+}
+
 class Intcode {
   constructor(code, input) {
     this.p = 0;
@@ -459,5 +464,6 @@ module.exports = {
   Point,
   Tree,
   UMap,
-  USet
+  USet,
+  setup
 };

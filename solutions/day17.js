@@ -1,5 +1,4 @@
-const {Intcode} = require("../tools");
-const setup = (data) => data.split(",").map(n => parseInt(n, 10));
+const {Intcode, setup} = require("../tools");
 
 class Robo extends Intcode {
   constructor(data) {
@@ -44,7 +43,7 @@ function part2(code) {
     "R,8,R,6,R,6,R,8\n" +
     "n\n"
   ).split("").map(c => c.charCodeAt(0));
-  
+
   const robo = new Intcode(code).setInput(input);
   robo.code[0] = 2;
 
