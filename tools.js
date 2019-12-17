@@ -89,6 +89,7 @@ class Intcode {
 
   setInput(val) {
     if (val instanceof Intcode) val.nextIntcode = this;
+    else if (Array.isArray(val)) this.input = this.input.concat(val);
     else this.input.push(val);
     return this;
   }
