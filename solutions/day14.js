@@ -44,7 +44,7 @@ class Reaction {
   }
 }
 
-function part1(reactions, whole = (n) => Math.ceil(n)) {
+function part1(reactions, whole = Math.ceil) {
   const FUEL = reactions.get("FUEL");
   const requires = new UMap([["FUEL", {reaction: FUEL, required: 1}]]);
 
