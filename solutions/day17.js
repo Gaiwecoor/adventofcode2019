@@ -9,12 +9,6 @@ class Robo extends Intcode {
     this.printY = 0;
   }
 
-  setInput(val) {
-    this.input = Array(val.length);
-    for (let i = 0; i < val.length; i++) this.input[i] = val.charCodeAt(i);
-    return this;
-  }
-
   OUTPUT(a) {
     if (a == 10) {
       if (this.print) console.log(this.out);
@@ -50,6 +44,7 @@ function part2(code) {
     "R,8,R,6,R,6,R,8\n" +
     "n\n"
   ).split("").map(c => c.charCodeAt(0));
+  
   const robo = new Intcode(code).setInput(input);
   robo.code[0] = 2;
 
