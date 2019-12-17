@@ -356,6 +356,10 @@ class Grid extends UMap {
     super(data);
   }
 
+  delete(x, y) {
+    return super.delete(`${x},${y}`);
+  }
+  
   get(x, y) {
     return super.get(`${x},${y}`);
   }
