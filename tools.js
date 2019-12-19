@@ -164,7 +164,7 @@ class Link {
 
   addAfter(value) {
     const displaced = this.after;
-    const newLink = new Link(value);
+    const newLink = new this.constructor(value);
     this.after = newLink;
     newLink.before = this;
     newLink.after = displaced;
@@ -174,7 +174,7 @@ class Link {
 
   addBefore(value) {
     const displaced = this.before;
-    const newLink = new Link(value);
+    const newLink = new this.constructor(value);
     this.before = newLink;
     newLink.after = this;
     newLink.before = displaced;
@@ -185,15 +185,14 @@ class Link {
   get chainSize() {
     let link = this;
     let size = 1;
-    if (this.closed) {
-      while (this !== link.after) {
-        link = link.after;
-        size++;
-      }
-    } else {
-      while (link = link.before) size++;
-      link = this;
-      while (link = link.after) size++;
+    while (link = link.before) {
+      if (link == this) return size;
+      size++;
+    }
+    link = this;
+    while (link = link.after) {
+      if (link == this) return size;
+      size++;
     }
     return size;
   }
@@ -204,7 +203,8 @@ class Link {
     while (i++ < q) {
       link = link.after;
       if (!link) break;
-    }return link;
+    }
+    return link;
   }
 
   previous(q = 1) {
@@ -229,11 +229,11 @@ class Point {
     if (x.x !== undefined && x.y !== undefined) {
       this.x = x.x;
       this.y = x.y;
-      this.value = y;
+      for (const prop in y) this[prop] = y[prop];
     } else {
       this.x = x;
       this.y = y;
-      this.value = v;
+      for (const prop in v) this[prop] = v[prop];
     }
   }
 
@@ -288,13 +288,13 @@ class UMap extends Map {
   }
 
   clone() {
-    const clone = new UMap();
+    const clone = new this.constructor();
     for (const [key, value] of this) clone.set(key, value);
     return clone;
   }
 
   filter(fn) {
-    const filtered = new UMap();
+    const filtered = new this.constructor();
     for (const [key, value] of this) {
       if (fn(value, key)) filtered.set(key, value);
     }
@@ -310,7 +310,7 @@ class UMap extends Map {
 
   first(n) {
     if (n !== undefined) {
-      let values = new Array(Math.min(parseInt(n, 10), this.size));
+      let values = Array(Math.min(parseInt(n, 10), this.size));
       let i = 0;
       for (const [key, value] of this) {
         values[i++] = value;
@@ -324,8 +324,13 @@ class UMap extends Map {
     }
   }
 
+  join(other) {
+    for (const [key, value] of other) this.set(key, value);
+    return this;
+  }
+
   map(fn) {
-    const mapped = new Array(this.size);
+    const mapped = Array(this.size);
     let i = 0;
     for (const [key, value] of this) {
       mapped[i++] = fn(value, key, this);
@@ -359,7 +364,7 @@ class Grid extends UMap {
   delete(x, y) {
     return super.delete(`${x},${y}`);
   }
-  
+
   get(x, y) {
     return super.get(`${x},${y}`);
   }
@@ -379,16 +384,23 @@ class USet extends Set {
   }
 
   clone() {
-    return new USet([...this]);
+    const cloned = new this.constructor();
+    for (const element of this) cloned.add(element);
+    return cloned;
   }
 
   deleteIndex(index) {
-    this.delete(this.getIndex(index));
-    return this;
+    let i = 0;
+    for (const element of this) {
+      if (index == i++) {
+        this.delete(element);
+        return this;
+      }
+    }
   }
 
   filter(fn) {
-    const filtered = new USet();
+    const filtered = new this.constructor();
     for (const value of this) {
       if (fn(value)) filtered.add(value);
     }
@@ -404,7 +416,7 @@ class USet extends Set {
 
   first(n) {
     if (n !== undefined) {
-      let values = new Array(Math.min(parseInt(n, 10), this.size));
+      let values = Array(Math.min(parseInt(n, 10), this.size));
       let i = 0;
       for (const value of this) {
         values[i++] = value;
@@ -419,15 +431,28 @@ class USet extends Set {
   }
 
   getIndex(index) {
-    return [...this][index];
+    let i = 0;
+    for (const element of this) {
+      if (index == i++) return element;
+    }
+  }
+
+  join(other) {
+    for (const element of other) this.add(element);
+    return this;
   }
 
   map(fn) {
-    return [...this].map(fn);
+    const mapped = Array(this.size);
+    let i = 0;
+    for (const element of this) mapped[i++] = fn(element);
+    return mapped;
   }
 
   reduce(fn, value) {
-    return [...this].reduce(fn, value);
+    let accumulator = value;
+    for (const element of this) accumulator = fn(accumulator, element);
+    return accumulator;
   }
 
   sort(fn) {
@@ -443,8 +468,7 @@ class Tree {
   }
 
   addChild(child, returnChild = false) {
-    let thisType = this.constructor;
-    if (!(child instanceof thisType)) child = new thisType(child);
+    if (!(child instanceof this.constructor)) child = new this.constructor(child);
     child.parent = this;
     this.children.set(child.id, child);
     return (returnChild ? child : this);
