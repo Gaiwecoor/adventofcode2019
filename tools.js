@@ -255,6 +255,10 @@ class Point {
   get label() {
     return `${this.x},${this.y}`;
   }
+
+  offset(pt, v) {
+    return new Point(this.x + pt.x, this.y + pt.y, v);
+  }
 }
 
 class Solution {
@@ -362,19 +366,23 @@ class Grid extends UMap {
   }
 
   delete(x, y) {
+    if (x instanceof Point) return super.delete(`${x.x},${x.y}`);
     return super.delete(`${x},${y}`);
   }
 
   get(x, y) {
-    return super.get(`${x},${y}`);
+    if (x instanceof Point) return super.get(`${x.x},${x.y}`);
+    else return super.get(`${x},${y}`);
   }
 
   has(x, y) {
-    return super.has(`${x},${y}`);
+    if (x instanceof Point) return super.has(`${x.x},${x.y}`);
+    else return super.has(`${x},${y}`);
   }
 
   set(x, y, value) {
-    return super.set(`${x},${y}`, value);
+    if (x instanceof Point) return super.set(`${x.x},${x.y}`, y);
+    else return super.set(`${x},${y}`, value);
   }
 }
 
