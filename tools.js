@@ -229,11 +229,11 @@ class Point {
     if (x.x !== undefined && x.y !== undefined) {
       this.x = x.x;
       this.y = x.y;
-      for (const prop in y) this[prop] = y[prop];
+      if (y) for (const prop in y) this[prop] = y[prop];
     } else {
       this.x = x;
       this.y = y;
-      for (const prop in v) this[prop] = v[prop];
+      if (v) for (const prop in v) this[prop] = v[prop];
     }
   }
 
