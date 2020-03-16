@@ -1,6 +1,4 @@
-const {Intcode} = require("../tools");
-
-const setup = data => data.split(",").map(n => parseInt(n, 10));
+const {Intcode, setup} = require("../tools");
 
 class Springbot extends Intcode {
   constructor(code) {
